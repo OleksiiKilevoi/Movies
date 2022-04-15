@@ -1,30 +1,25 @@
 import { getRepository } from "typeorm";
 import App from "./App";
 import UserController from "./controllers/UserController";
-import { AppDataSource } from "./data-source"
+import { AppDataSource } from "./db/data-source"
 import { Movie } from "./entity/Movie";
 import { User } from "./entity/User"
-import UsersDbClass from "./Users";
+import UsersDbClass from "./db/Users";
+import MovieController from "./controllers/MovieController";
+import MoviesDbClass from "./db/Movies";
 
 const main = async () => {
     const db = await AppDataSource.initialize();
 
     const usersTable = new UsersDbClass(db);
+    const moviesTable = new MoviesDbClass(db);
 
-    const userController = new UserController(usersTable)
-    // const movie = new Movie()
+    const userController = new UserController(usersTable);
+    const movieController = new MovieController(usersTable, moviesTable);
 
-    // movie.title = "Casablanca";
-    // movie.year = 1942;
-    // movie.format = "DVD";
-    // movie.actors = [
-    //     "Humphrey Bogartt",
-    //     "Ingrid Bergman",
-    //     "Claude Rains",
-    //     "Peter Lorre"
-    // ]
      const controllers = [
-      userController
+      userController,
+      movieController
     ];
 
     const port = Number(process.env.PORT) || 5000;

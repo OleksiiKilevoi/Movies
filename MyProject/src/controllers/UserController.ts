@@ -2,7 +2,7 @@
 import { RequestHandler } from 'express';
 import Controller from './Controller';
 import { User } from '../entity/User';
-import UsersDbClass from '../Users';
+import UsersDbClass from '../db/Users';
 
 class UserController extends Controller {
     public constructor(

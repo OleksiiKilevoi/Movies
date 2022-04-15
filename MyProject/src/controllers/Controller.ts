@@ -1,5 +1,5 @@
 import { RequestHandler, Router } from 'express';
-import Users from '../Users';
+import Users from '../db/Users';
 
 
 
