@@ -8,8 +8,7 @@ export default class UsersDbClass {
 
     public create = async (user: User): Promise<User> => this.db.manager.save(User, user);
 
-    // public getById = async (id: number | string): Promise<UserModel> => this.table
-    //     .select()
-    //     .where(eq(this.table.id, Number(id)))
-    //     .first();
+    public getById = async (id: number): Promise<User> => this.db.manager.findOneBy(User, { id } );
+
+    public getByEmail = async (email: string) => this.db.manager.findOneBy(User, { email});
 }

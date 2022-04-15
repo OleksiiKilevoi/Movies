@@ -17,7 +17,7 @@ class MovieController extends Controller {
     }
 
     private initializeRoutes = () => {
-        this.router.post('/', this.createMovie);
+        this.router.post('/', this.protectRoute, this.createMovie);
 
     };
 

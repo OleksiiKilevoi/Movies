@@ -1,4 +1,5 @@
-import { getRepository } from "typeorm";
+import 'dotenv/config';
+
 import App from "./App";
 import UserController from "./controllers/UserController";
 import { AppDataSource } from "./db/data-source"
