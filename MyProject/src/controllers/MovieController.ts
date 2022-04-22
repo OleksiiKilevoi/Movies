@@ -6,6 +6,7 @@ import { Movie } from '../entity/Movie';
 
 import fileUpload = require('express-fileupload');
 import * as fs from 'fs';
+import { sort as sortUtil, SortOrder, SortType } from 'utils/sortUtil';
 
 
 class MovieController extends Controller {
@@ -20,8 +21,62 @@ class MovieController extends Controller {
   }
 
   private initializeRoutes = () => {
+    this.router.get('/', this.protectRoute, this.getList);
     this.router.post('/', this.protectRoute, this.createMovie);
     this.router.post('/import', this.protectRoute, this.importMovies);
+    this.router.delete('/:id', this.protectRoute, this.deleteMovie);
+    this.router.patch('/:id', this.protectRoute, this.patchMovie);
+  };
+
+  private patchMovie: RequestHandler<{id: string }, {}, Movie>= async (req, res) => {
+    const { id } = req.params;
+    const result = await this.movies.patchMovie(Number(id), req.body);
+    
+    return res.status(201).json(result)
+  };
+
+
+  private deleteMovie: RequestHandler = async (req, res) => {
+    const { id } = req.params;
+    const result = await this.movies.deleteById(Number(id))
+    return res.status(201).json(result)
+  };
+
+  private getList: RequestHandler<
+  // { sort: 'title' | 'year' | 'id', order: 'ASC' | 'DESC', limit: number, offset: number, actor: string, title: string },
+  {}> = async (req, res) => {
+    const { 
+      sort = 'id',
+      order = 'ASC',
+      limit = 20,
+      offset = 0,
+      actor, 
+      title,
+      search
+    } = req.query;
+    // const { sort = year & order=DESC& limit=10 & offset=0 }
+
+    const a = actor as string
+    const allMovies = await this.movies.getAll()
+    if(actor) {
+     const moviesFiltered = allMovies.filter((movie) => movie.actors.join(',').includes(a))
+      const sortedCustomers = sortUtil(moviesFiltered, ((movies) => movies.title), SortOrder.ASCENDING, SortType.String)
+     return res.status(200).json(moviesFiltered);
+    }
+
+    const qp = {
+      year: 1986,
+      // title: 'Casablanca'
+    }
+
+    const resultMovies = Object.keys(qp).reduce<Movie[]>((res, key) => {
+
+      
+     return res.filter(movie => movie[key] === qp[key])
+    }
+    ,allMovies)
+
+    return res.status(200).json(resultMovies);
   };
 
   private importMovies: RequestHandler<
