@@ -42,6 +42,7 @@ abstract class Controller {
 
       return next();
     } catch (e: any) {
+      return res.status(401).json(errorResponse('401', e.message));
     }
   };
 
