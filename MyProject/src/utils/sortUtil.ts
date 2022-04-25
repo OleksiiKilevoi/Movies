@@ -8,8 +8,8 @@
  */
 
 export enum SortOrder {
-    ASCENDING = 'asc',
-    DESCENDING = 'desc',
+    ASCENDING = 'ASC',
+    DESCENDING = 'DESC',
 }
 
 export enum SortType {

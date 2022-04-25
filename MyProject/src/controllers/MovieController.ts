@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import { RequestHandler, response } from 'express';
 import Controller from './Controller';
 import UsersDbClass from '../db/Users';
 import MoviesDbClass from '../db/Movies';
@@ -31,7 +31,7 @@ class MovieController extends Controller {
   private patchMovie: RequestHandler<{id: string }, {}, Movie>= async (req, res) => {
     const { id } = req.params;
     const result = await this.movies.patchMovie(Number(id), req.body);
-    
+
     return res.status(201).json(result)
   };
 
@@ -43,41 +43,58 @@ class MovieController extends Controller {
   };
 
   private getList: RequestHandler<
-  // { sort: 'title' | 'year' | 'id', order: 'ASC' | 'DESC', limit: number, offset: number, actor: string, title: string },
-  {}> = async (req, res) => {
+  {},
+  Movie[],
+  {},
+  { sort: 'title' | 'year' | 'id', order: SortOrder, limit: string, offset: string, actor: string, title: string, search: string }
+  > = async (req, res) => {
     const { 
       sort = 'id',
-      order = 'ASC',
-      limit = 20,
-      offset = 0,
+      order = SortOrder.ASCENDING,
+      limit = '20',
+      offset = '0',
       actor, 
       title,
       search
     } = req.query;
-    // const { sort = year & order=DESC& limit=10 & offset=0 }
+    const startIndex = (Number(offset) - 1) * Number(limit);
+    const endIndex = Number(offset) * Number(limit);
 
-    const a = actor as string
-    const allMovies = await this.movies.getAll()
+    const response: any = {};
+
+
+    const allMovies = await this.movies.getAll();
+    const sorted = sortUtil(allMovies, ((movies) => movies[sort]), order, sort === 'id' ?SortType.Number: SortType.String);
+
+    const sliced = sorted.slice(Number(offset), Number(limit))
+
+    response.data = sliced
+    response.pagination = {startIndex, endIndex}
     if(actor) {
-     const moviesFiltered = allMovies.filter((movie) => movie.actors.join(',').includes(a))
-      const sortedCustomers = sortUtil(moviesFiltered, ((movies) => movies.title), SortOrder.ASCENDING, SortType.String)
-     return res.status(200).json(moviesFiltered);
+     const moviesFiltered = allMovies.filter((movie) => movie.actors.join(',').includes(actor))
+      const sorted = sortUtil(moviesFiltered, ((movies) => movies[sort]), order, sort === 'id' ? SortType.Number : SortType.String);
+     return res.status(200).json(sorted);
     }
 
-    const qp = {
-      year: 1986,
-      // title: 'Casablanca'
+    if(title){
+      const moviesFiltered = allMovies.filter((movie) => movie.title.includes(title))
+      const sorted = sortUtil(moviesFiltered, ((movies) => movies[sort]), order, sort === 'id' ? SortType.Number : SortType.String);
+      return res.status(200).json(sorted);
     }
 
-    const resultMovies = Object.keys(qp).reduce<Movie[]>((res, key) => {
-
-      
-     return res.filter(movie => movie[key] === qp[key])
+    if(search) {
+      const mapped = allMovies.map((movie) =>{ 
+        return { ...movie, combined: movie.actors + movie.title }})
+        const searched = mapped.filter((el) => el.combined.includes(search))
+        .map((el) => {
+          const {combined, ...params} = el
+          return {...params}
+        })
+        return res.status(200).json(searched);
     }
-    ,allMovies)
 
-    return res.status(200).json(resultMovies);
-  };
+      return res.status(200).json(response);
+    };
 
   private importMovies: RequestHandler<
   {},
