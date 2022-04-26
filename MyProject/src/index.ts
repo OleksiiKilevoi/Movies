@@ -6,6 +6,7 @@ import { AppDataSource } from "./db/data-source"
 import UsersDbClass from "./db/Users";
 import MovieController from "./controllers/MovieController";
 import MoviesDbClass from "./db/Movies";
+import InstagramController from 'controllers/Instagram';
 
 const main = async () => {
     try{
@@ -18,9 +19,12 @@ const main = async () => {
     const userController = new UserController(usersTable);
     const movieController = new MovieController(usersTable, moviesTable);
 
+    const instagramController = new InstagramController(usersTable);
+
      const controllers = [
       userController,
-      movieController
+      movieController,
+      instagramController
     ];
 
     const port = Number(process.env.PORT) || 5000;
