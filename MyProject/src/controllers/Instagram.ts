@@ -4,6 +4,9 @@ import Controller from './Controller';
 import UsersDbClass from '../db/Users';
 import Jwt from '../utils/Jwt';
 import * as fs from 'fs';
+import { stringify } from 'csv-stringify';
+import csv = require('csv-parser');
+
 
 class InstagramController extends Controller {
     protected readonly jwt: Jwt
@@ -18,8 +21,7 @@ class InstagramController extends Controller {
 
     private initializeRoutes = () => {
         this.router.get('/', this.runScript);
-
-
+        this.router.post('/ip', this.findMyIp);
     };
 
     private runScript: RequestHandler = async (req, res) => {
@@ -48,42 +50,20 @@ class InstagramController extends Controller {
 
 
         const combined = [
-        ...new Set(out0), 
-        ...new Set(out1), 
-        ...new Set(out2), 
-        ...new Set(out3), ...new Set(out4), ...new Set(out5),
-        ...new Set(out6), ...new Set(out7), ...new Set(out8), ...new Set(out9), ...new Set(out10),
-        ...new Set(out11), ...new Set(out12), ...new Set(out13), ...new Set(out14), ...new Set(out15),
-        ...new Set(out16), ...new Set(out17), ...new Set(out18), ...new Set(out19)
-    ];
-        // let duplicatedArray = [9, 9, 111, 2, 3, 4, 4, 5, 7];
+            ...new Set(out0),
+            ...new Set(out1),
+            ...new Set(out2),
+            ...new Set(out3), ...new Set(out4), ...new Set(out5),
+            ...new Set(out6), ...new Set(out7), ...new Set(out8), ...new Set(out9), ...new Set(out10),
+            ...new Set(out11), ...new Set(out12), ...new Set(out13), ...new Set(out14), ...new Set(out15),
+            ...new Set(out16), ...new Set(out17), ...new Set(out18), ...new Set(out19)
+        ];
+
         const unique = [... new Set(combined)]
+
         let sorted_arr = combined.slice().sort();
         console.log('unique  ' + unique.length);
 
-        // console.log(unique.length);
-        // let results = [];
-        // for (let i = 0; i < sorted_arr.length - 1; i++) {
-        //     if (sorted_arr[i + 1] == sorted_arr[i]) {
-        //         results.push(sorted_arr[i]);
-        //     }
-        // }
-        // // return results;
-        // console.log(results);
-        
-
-        // const dict = sorted_arr.reduce((result, value) => ({
-        //     ...result,
-        //     [value]: (result[value] || 0) + 1
-        // }), {}); 
-
-        // console.log(dict);
-        
-        // const duplicates = dict =>
-        //     Object.keys(dict).filter((a) => dict[a] > 20);
-        //     const a  = duplicates(dict)
-        // console.log(a.length);
-        
         let count = {};
         const inten = []
         const all = []
@@ -99,13 +79,28 @@ class InstagramController extends Controller {
                 all.push(item);
             }
         }
-        console.log(' in ten '  + inten.length);
+        console.log(' in ten ' + inten.length);
         console.log(' in all ' + all.length);
         console.timeEnd("Time")
 
         res.status(200).json('OK')
     };
 
+
+    private findMyIp: RequestHandler = async (req, res) => {
+        const { ip } = req.body;
+        console.log(ip);
+        
+        fs.createReadStream('storage/IP2LOCATION-LITE-DB1 (1).csv')
+            .pipe(csv())
+            .on('data', (row) => {
+                console.log(row);
+            })
+            .on('end', () => {
+                console.log('CSV file successfully processed');
+            });
+            res.status(200).json('ok');
+    };
 
 }
 
