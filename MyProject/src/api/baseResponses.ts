@@ -7,7 +7,7 @@ export const errorResponse = (code: string, message: string) => (
 
 export const okResponse = (data?: any) => (
   {
-    status: 'OK',
+    status: 'not ok OK',
     code: 200,
     data,
   }
